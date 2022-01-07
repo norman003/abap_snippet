@@ -1,0 +1,1 @@
+ASSIGN ('(SAPMM06E)EKKO-SUBMI') TO <fs>.

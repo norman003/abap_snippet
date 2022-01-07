@@ -1,0 +1,1 @@
+modify db-r_kunnr from ls_kunnr transporting sign option where sign = space.
