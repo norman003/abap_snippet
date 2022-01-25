@@ -1,0 +1,99 @@
+REPORT ymp MESSAGE-ID su.
+*----------------------------------------------------------------------*
+* Programa para descarga de ot pendientes
+* Created  06.11.2019 - by norman tinco
+* Modified 06.11.2019 - 001
+*----------------------------------------------------------------------*
+
+TYPES: BEGIN OF gty_report.
+    INCLUDE TYPE e070v.
+TYPES:
+  ticket    TYPE string,
+  modulo    TYPE string,
+  consultor TYPE string,
+  licencia  TYPE string,
+  empresa   TYPE string,
+  END OF gty_report.
+
+TYPES: BEGIN OF gty_down,
+         empresa    TYPE string,
+         consultor  TYPE string,
+         modulo     TYPE string,
+         trstatus   TYPE e070v-trstatus,
+         trkorr     TYPE e070v-trkorr,
+         trfunction TYPE e070v-trfunction,
+         as4text    TYPE e070v-as4text,
+         as4user    TYPE e070v-as4user,
+         as4date    TYPE e070v-as4date,
+         as4time    TYPE e070v-as4time,
+       END OF gty_down.
+
+DATA: gt_report TYPE TABLE OF gty_report.
+DATA: gt_down TYPE TABLE OF gty_down.
+INCLUDE ymmdolib.
+
+START-OF-SELECTION.
+  PERFORM down_ot_dev.
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+FORM down_ot_dev.
+
+  data ls_down like line of gt_down.
+  DATA: lo_error TYPE REF TO cx_root.
+  DATA: l_pos TYPE i.
+  data l_name type string.
+  FIELD-SYMBOLS: <fs_report> LIKE LINE OF gt_report.
+
+  SELECT * INTO CORRESPONDING FIELDS OF TABLE gt_report FROM e070v
+    WHERE strkorr = space
+     AND as4text LIKE '%30000%'
+     AND trstatus = 'D'.
+
+  DELETE gt_report WHERE trfunction = 'T'.
+
+  IF gt_report IS NOT INITIAL.
+    PERFORM _uploadym.
+
+
+    LOOP AT gt_report ASSIGNING <fs_report>.
+      FIND REGEX 'OS' IN <fs_report>-as4text MATCH OFFSET l_pos.
+      "1 Modulo
+      ADD 2 TO l_pos.
+      TRY.
+          <fs_report>-modulo = <fs_report>-as4text+l_pos(2).
+        CATCH cx_root INTO lo_error.
+      ENDTRY.
+      "2 Consultor
+      ADD 2 TO l_pos.
+      TRY.
+          <fs_report>-consultor = <fs_report>-as4text+l_pos(3).
+        CATCH cx_root INTO lo_error.
+      ENDTRY.
+      "3 Ticket
+      FIND REGEX '30000' IN <fs_report>-as4text MATCH OFFSET l_pos.
+      TRY.
+          <fs_report>-ticket = <fs_report>-as4text+l_pos(10).
+        CATCH cx_root INTO lo_error.
+      ENDTRY.
+      "4 Cliente
+      <fs_report>-licencia = lic_.
+      <fs_report>-empresa = zone-empresa.
+
+      ls_down-empresa = zone-empresa.
+      ls_down-consultor = <fs_report>-consultor.
+      ls_down-modulo = <fs_report>-modulo.
+      ls_down-trstatus = <fs_report>-trstatus.
+      ls_down-trkorr = <fs_report>-trkorr.
+      ls_down-trfunction = <fs_report>-trfunction.
+      ls_down-as4text = <fs_report>-as4text.
+      ls_down-as4user = <fs_report>-as4user.
+      ls_down-as4date = <fs_report>-as4date.
+      ls_down-as4time = <fs_report>-as4time.
+      APPEND ls_down TO gt_down.
+    ENDLOOP.
+    
+    concatenate 'D:\OT_' zone-empresa '.xls' into l_name.
+    PERFORM _downtable USING l_name '' gt_down.
+  ENDIF.
+ENDFORM.

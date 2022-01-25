@@ -1,0 +1,31 @@
+REPORT ym_comparecust.
+
+DATA dev TYPE TABLE OF zostb_constantes.
+DATA dev2 TYPE TABLE OF zostb_constantes.
+* Modified 22.11.2019 - 2
+DATA ls2 LIKE LINE OF dev.
+
+SELECT * INTO TABLE dev FROM zostb_constantes CLIENT SPECIFIED WHERE mandt = 400.
+SELECT * INTO TABLE dev2 FROM zostb_constantes CLIENT SPECIFIED WHERE mandt = 450.
+
+LOOP AT dev INTO ls.
+  DATA l_tabix TYPE i.
+  l_tabix = sy-tabix.
+  READ TABLE dev2 INTO ls2 WITH KEY modulo = ls-modulo aplicacion = ls-aplicacion programa = ls-programa campo = ls-campo secuencia = ls-secuencia.
+  clear ls-mandt.
+  clear ls2-mandt.
+  IF ls = ls2.
+    DELETE dev INDEX l_tabix.
+  ENDIF.
+ENDLOOP.
+
+PERFORM _alvsimple CHANGING dev.
+
+*----------------------------------------------------------------------*
+FORM _alvsimple CHANGING ct_table TYPE table.
+  DATA: lo_alv       TYPE REF TO cl_salv_table.
+  CHECK ct_table IS NOT INITIAL.
+  cl_salv_table=>factory( IMPORTING r_salv_table = lo_alv
+                          CHANGING t_table       = ct_table ).
+  lo_alv->display( ).
+ENDFORM.
