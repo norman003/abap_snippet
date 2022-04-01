@@ -1,5 +1,3 @@
-REPORT ysalv.
-
 *----------------------------------------------------------------------*
 *       CLASS cl_event_handler DEFINITION
 *----------------------------------------------------------------------*
@@ -98,4 +96,4 @@ START-OF-SELECTION.
   DATA alv TYPE REF TO zcl_alv.
   CREATE OBJECT alv.
   SELECT * FROM usr02 UP TO 30 ROWS APPENDING CORRESPONDING FIELDS OF TABLE alv->gt_usr ORDER BY bname.
-  alv->alv_show( ct_table = alv->gt_usr ).
+  alv->alv_show( CHANGING ct_table = alv->gt_usr ).

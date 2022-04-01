@@ -1,34 +1,34 @@
-﻿CLASS zcl_amp_a DEFINITION.
+﻿CLASS lcl_process DEFINITION DEFERRED.
+DATA: go_process TYPE REF TO lcl_process.
+
+CLASS lcl_process DEFINITION.
   PUBLIC SECTION.
     "Tipos
-
     "Data
-    DATA: BEGIN OF zamp,
-            is_edicion TYPE xfeld,
-            is_sociedad TYPE xfeld,
-            is_active TYPE xfeld,
-
-          END OF zamp.
     DATA: BEGIN OF zconst,
-            f_active TYPE datum,
-
             r_bukrs  TYPE RANGE OF bukrs,
           END OF zconst.
 
     "Metodos
+    METHODS a10_accion EXCEPTIONS error.
+
+  PRIVATE SECTION.
     METHODS inicializa EXCEPTIONS error.
-    METHODS validacion EXCEPTIONS error.
-    METHODS accion_a10 EXCEPTIONS error.
+    METHODS a10_valida EXCEPTIONS error.
 ENDCLASS.
 
-CLASS zcl_amp_a IMPLEMENTATION.
-*----------------------------------------------------------------------*
-* Inicializa
-*----------------------------------------------------------------------*
+CLASS lcl_process IMPLEMENTATION.
   METHOD inicializa.
     DATA: lt_const TYPE TABLE OF zostb_constantes,
           ls_const LIKE LINE OF lt_const,
-          l_string TYPE string.
+          l_string TYPE string,
+          l_active TYPE xfeld.
+
+    "Active
+    zosge_utilities=>validar_ampliacion( EXPORTING i_modulo = 'SD' i_repid = sy-repid CHANGING c_activo = l_active ).
+    IF l_active IS INITIAL.
+      RAISE error.
+    ENDIF.
 
     "Get
     IMPORT zconst = zconst FROM MEMORY ID sy-repid.
@@ -41,29 +41,22 @@ CLASS zcl_amp_a IMPLEMENTATION.
       LOOP AT lt_const INTO ls_const.
         CONCATENATE ls_const-signo ls_const-opcion ls_const-valor1 INTO l_string.
         CASE ls_const-campo.
-            "Fecha activa
-          WHEN 'F_ACTIVE'.
-            CONCATENATE ls_const-valor1+6(4)
-                        ls_const-valor1+3(2)
-                        ls_const-valor1+0(2) INTO zconst-f_active.
-            "WHEN 'BUKRS'. APPEND l_string TO zconst-r_bukrs.
+**          WHEN 'BUKRS'. APPEND l_string TO zconst-r_bukrs.
         ENDCASE.
       ENDLOOP.
-
-      "Mandatory
-*      IF zconst-r_bukrs IS INITIAL.
-*        RAISE error.
-*      ENDIF.
       EXPORT zconst = zconst TO MEMORY ID sy-repid.
     ENDIF.
+
+**    "Mandatory
+**    IF zconst-r_cilindraje IS INITIAL.
+**      RAISE error.
+**    ENDIF.
   ENDMETHOD.
 
-*---------------------------------------------------------------------*
-* Inicializa
-*---------------------------------------------------------------------*
-  METHOD validacion.
 
-    DATA: ls_head TYPE mepoheader.
+  METHOD a10_valida.
+    DATA: l_edicion  TYPE xfeld,
+          l_sociedad TYPE xfeld.
 
     "Inicializa
     inicializa( EXCEPTIONS error = 1 ).
@@ -72,57 +65,46 @@ CLASS zcl_amp_a IMPLEMENTATION.
     ENDIF.
 
     "Edicion
-*    IF trtyp <> 'A'. "View exclude
-*      zamp-is_edicion = abap_on.
-*    ENDIF.
-*    IF <godynpro>-action IN zconst-action AND
-*       <godynpro>-refdoc IN zconst-refdoc.
-*      zamp-is_edicion = abap_on.
-*    ENDIF.
+**    IF trtyp <> 'A'. "View exclude
+**      l_edicion = abap_on.
+**    ENDIF.
+**    IF <godynpro>-action IN zconst-action AND
+**       <godynpro>-refdoc IN zconst-refdoc.
+**      l_edicion = abap_on.
+**    ENDIF.
 
     "Sociedad
-*    ls_head = im_header->get_data( ).
-*    IF ls_head-bukrs IN zconst-r_bukrs AND
-*       ls_head-bsart IN zconst-r_bsart.
-*      zamp-is_sociedad = abap_on.
-*    ENDIF.
-
-    "Fecha de activacion
-    IF zconst-f_active <= sy-datum.
-      zamp-is_active = abap_on.
-    ENDIF.
+**    ls_head = im_header->get_data( ).
+**    IF ls_head-bukrs IN zconst-r_bukrs.
+**      l_sociedad = abap_on.
+**    ENDIF.
 
     "Resultado
-    IF zamp-is_edicion = abap_off OR zamp-is_sociedad = abap_off OR zamp-is_active = abap_off.
+    IF l_edicion = abap_off OR l_sociedad = abap_off.
       RAISE error.
     ENDIF.
-
   ENDMETHOD.
 
-*--------------------------------------------------------------------*
-* Accion
-*--------------------------------------------------------------------*
-  METHOD accion_a10.
 
+  METHOD a10_accion.
     DATA: ls_item TYPE mepoitem.
 
     "Valida
-    validacion( EXCEPTIONS error = 1 ).
+    a10_valida( EXCEPTIONS error = 1 ).
     IF sy-subrc <> 0.
       RAISE error.
     ENDIF.
 
-*    ls_item = co_item->get_data( ).
-
-    "Si ingresa pedido obtener referencia
-*    IF ls_item-zzvbeln IS NOT INITIAL AND ls_item-zzihrez_e IS INITIAL.
-*      SELECT SINGLE ihrez_e INTO ls_item-zzihrez_e FROM vbkd WHERE vbeln = ls_item-zzvbeln.
-*    ENDIF.
-
-    "Si ingresa referencia obtener pedido
-*    IF ls_item-zzvbeln IS INITIAL AND ls_item-zzihrez_e IS NOT INITIAL.
-*      SELECT SINGLE vbeln INTO ls_item-zzvbeln FROM vbkd WHERE ihrez_e = ls_item-zzihrez_e.
-*    ENDIF.
-
+**    ls_item = co_item->get_data( ).
+**
+**    "Si ingresa pedido obtener referencia
+**    IF ls_item-zzvbeln IS NOT INITIAL AND ls_item-zzihrez_e IS INITIAL.
+**      SELECT SINGLE ihrez_e INTO ls_item-zzihrez_e FROM vbkd WHERE vbeln = ls_item-zzvbeln.
+**    ENDIF.
+**
+**    "Si ingresa referencia obtener pedido
+**    IF ls_item-zzvbeln IS INITIAL AND ls_item-zzihrez_e IS NOT INITIAL.
+**      SELECT SINGLE vbeln INTO ls_item-zzvbeln FROM vbkd WHERE ihrez_e = ls_item-zzihrez_e.
+**    ENDIF.
   ENDMETHOD.
 ENDCLASS.

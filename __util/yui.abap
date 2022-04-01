@@ -1,23 +1,23 @@
-﻿class lcl_util definition
+﻿CLASS lcl_util DEFINITION
   .
 
-public section.
+  PUBLIC SECTION.
 
-  types:
+    TYPES:
     BEGIN OF gtty_mail_attach,
         titulo     TYPE so_obj_des,
         tipo       TYPE so_obj_tp,
         attach     TYPE bcsy_text,
         attach_hex TYPE solix_tab,
       END OF gtty_mail_attach .
-  types:
+    TYPES:
     BEGIN OF gtty_mail_cab,
         subject     TYPE so_obj_des,
         sender      TYPE uname,
         sender_mail TYPE ad_smtpadr,
         inmediato   TYPE xfeld,
       END OF gtty_mail_cab .
-  types:
+    TYPES:
     BEGIN OF gtty_mail_desti,
         uname   TYPE uname,
         name    TYPE name_text,
@@ -27,14 +27,14 @@ public section.
         copia   TYPE boolean,
         cco     TYPE boolean,
       END OF gtty_mail_desti .
-  types:
+    TYPES:
     BEGIN OF gtty_mail_so10,
         name  TYPE dstring,
         tline TYPE tline_t,
         text  TYPE dstring,
       END OF gtty_mail_so10 .
-  types:
-    BEGIN OF gtty_mail_z,
+    TYPES:
+    BEGIN OF gtty_mail_data,
         so10_asunto  TYPE gtty_mail_so10,
         so10_cuerpo1 TYPE gtty_mail_so10,
         so10_cuerpo2 TYPE gtty_mail_so10,
@@ -43,441 +43,408 @@ public section.
         desti        TYPE TABLE OF gtty_mail_desti WITH DEFAULT KEY,
         cuerpo       TYPE bcsy_text,
         attach       TYPE TABLE OF gtty_mail_attach WITH DEFAULT KEY,
-      END OF gtty_mail_z .
-  types:
-    BEGIN OF gtty_rate,
-        date         TYPE datum,
-        waers_o      TYPE waers,
-        waers_d      TYPE waers,
-        type_of_rate TYPE char01,
-        kursf        TYPE kursf,
-      END OF gtty_rate .
-  types:
-    BEGIN OF gtty_unit,
-        matnr   TYPE matnr,
-        meins_i TYPE meins,
-        meins_o TYPE meins,
-        menge   TYPE menge_d,
-      END OF gtty_unit .
-  types:
+      END OF gtty_mail_data .
+    TYPES:
     gtt_mail_attach TYPE TABLE OF gtty_mail_attach WITH DEFAULT KEY .
-  types:
+    TYPES:
     gtt_mail_desti  TYPE TABLE OF gtty_mail_desti WITH DEFAULT KEY .
 
-  constants GC_GRAY type CHAR4 value '@EB@'. "#EC NOTEXT
-  constants GC_GREEN type CHAR4 value '@08@'. "#EC NOTEXT
-  constants GC_RED type CHAR4 value '@0A@'. "#EC NOTEXT
-  constants GC_YELLOW type CHAR4 value '@09@'. "#EC NOTEXT
-  data GS_MAIL type GTTY_MAIL_Z .
-  data:
-    gth_rate TYPE HASHED TABLE OF gtty_rate WITH UNIQUE KEY date waers_o waers_d type_of_rate .
-  data:
-    gth_unit TYPE HASHED TABLE OF gtty_unit WITH UNIQUE KEY matnr meins_i meins_o .
-  data GT_BATCH type BDCDATA_TAB .
-  data GT_BATCHRET type BAPIRET2_TAB .
+    CONSTANTS gc_gray TYPE char4 VALUE '@EB@'. "#EC NOTEXT
+    CONSTANTS gc_green TYPE char4 VALUE '@08@'. "#EC NOTEXT
+    CONSTANTS gc_red TYPE char4 VALUE '@0A@'. "#EC NOTEXT
+    CONSTANTS gc_yellow TYPE char4 VALUE '@09@'. "#EC NOTEXT
+    DATA gs_mail TYPE gtty_mail_data .
+    DATA gt_batch TYPE bdcdata_tab .
+    DATA gt_batchret TYPE bapiret2_tab .
 
-  methods ALVFAST_SHOW
-    changing
-      !CT_TABLE type STANDARD TABLE
-      !CT_FCAT type LVC_T_FCAT .
-  methods ALVGRID_SHOW .
-  methods ALVLVC_EXCLUDEST
-    changing
-      !CT_EXCL type SLIS_T_EXTAB .
-  methods ALVLVC_REFRESH
-    changing
-      !CS_SEL type SLIS_SELFIELD .
-  methods ALVLVC_SETTOP
-    importing
-      !I_TYP type STRING
-      !I_KEY type STRING
-      !I_INFO type ANY
-    changing
-      !CT_HEAD type SLIS_T_LISTHEADER .
-  methods ALVLVC_SHOW
-    changing
-      !CT_TABLE type STANDARD TABLE .
-  methods ALVSALV_SHOW
-    changing
-      !CT_FCAT type LVC_T_FCAT
-      !CT_TABLE type STANDARD TABLE .
-  methods ALV_COLOR
-    importing
-      !I_CAMPO type CLIKE
-      !I_COLOR type I default 3
-    returning
-      value(RT_CELL) type LVC_T_SCOL .
-  methods ALV_FCATGEN
-    exporting
-      !ET_FCAT type LVC_T_FCAT
-    changing
-      !CT_TABLE type STANDARD TABLE
-      !C_CAMPO type CLIKE optional .
-  methods ALV_FCATNAME
-    importing
-      !I_UNICO type CLIKE
-      !I_LARGE type CLIKE optional
-    changing
-      !CS_FCAT type LVC_S_FCAT .
-  methods ALV_STYLE
-    importing
-      !I_CAMPO type CLIKE optional
-      !I_STYLE type LVC_STYLE default CL_GUI_ALV_GRID=>MC_STYLE_DISABLED
-    changing
-      !CT_CELL type LVC_T_STYL .
-  methods AMP_ME21N
-    importing
-      !IO_ITEM type ref to IF_PURCHASE_ORDER_ITEM_MM .
-  methods BAPI_DATAX .
-  methods BAPI_SAVE
-    importing
-      !IT_RETURN type BAPIRETTAB
-      !I_NUMBER type I optional
-    exporting
-      !E_ICON type ICON-ID
-      !E_MESSAGE type STRING
-    changing
-      !CT_RETURN type BAPIRETTAB optional
-    exceptions
-      ERROR .
-  methods BATCH_CALL
-    importing
-      !I_TCODE type CLIKE
-      !IS_PARAM type CTU_PARAMS optional
-      !I_NUMBER type I optional
-    exporting
-      !E_ICON type ICON-ID
-      !E_MESSAGE type STRING
-    changing
-      !CT_RETURN type BAPIRETTAB optional
-    exceptions
-      ERROR .
-  methods BATCH_DYNPRO
-    importing
-      !I_PROGRAM type CLIKE
-      !I_DYNPRO type CLIKE
-      !I_KEY type CLIKE optional .
-  methods BATCH_FIELD
-    importing
-      !I_FIELD type CLIKE
-      !I_INDEX type ANY optional
-      !I_VALUE type ANY .
-  methods BATCH_RUTINA .
-  methods CONST_RANGE_SET
-    importing
-      !IS_CONST type ZOSTB_CONSTANTES
-    changing
-      !CR_RANGE type STANDARD TABLE .
-  methods CONVERT_TO_STRING
-    importing
-      !IN type ANY
-    returning
-      value(OUT) type STRING .
-  methods CURSOR_PARALLEL .
-  methods CURSOR_SELECT .
-  methods DATE_FROMCHAR
-    importing
-      !I_FECHA type CLIKE
-    changing
-      !E_DATUM type DATUM .
-  methods DATE_INTERVAL
-    importing
-      !I_DATUM type SY-DATUM
-      !I_DAY type NUMC2 optional
-      !I_MONTH type NUMC2 optional
-      !I_SIGN type CHAR01 default '+'
-      !I_YEAR type NUMC2 optional
-    returning
-      value(E_DATUM) type SY-DATUM .
-  methods DATE_STARTEND
-    importing
-      !I_DATE type DATUM
-    changing
-      !E_FECINI type DATUM
-      !E_FECFIN type DATUM .
-  methods DYNAMIC_SELECT .
-  methods DYNPRO .
-  methods DYNPRO_FORZAR_PBO .
-  methods DYNPRO_HELP .
-  methods EXCEL_UPLOAD .
-  methods EXCEL_UPLOADEASY
-    importing
-      !I_FILENAME type CLIKE
-    changing
-      !RT_DATA type STANDARD TABLE .
-  methods F4_FIELD .
-  methods FIELD_GETDYNAMIC
-    importing
-      !I_FIELD type CLIKE
-      !IS_LINE type ANY
-    changing
-      !E_OUT type ANY .
-  methods FILE_BROWSER
-    changing
-      !C_DIR type CLIKE
-    exceptions
-      ERROR .
-  methods FILE_EXIST
-    importing
-      !I_FILE type CLIKE
-    changing
-      !E_SUBRC type SY-SUBRC
-    exceptions
-      ERROR .
-  methods FIND_REGEX .
-  methods FOLDER_LISTFILES
-    importing
-      !I_DIR type CLIKE
-    changing
-      !ET_FILE type DB2_T_STRING .
-  methods HANA_RANGE .
-  methods HANA_SELECT .
-  methods INPUT_DATA
-    importing
-      !I_TITLE type CLIKE
-      !I_TAB type CLIKE
-      !I_FIELD type CLIKE
-    exporting
-      !E_VALUE type CLIKE
-    exceptions
-      CANCEL .
-  methods ISAUTHORITHY_VKORG
-    importing
-      !I_VKORG type VKORG
-      !I_VTWEG type VTWEG
-      !I_SPART type SPART
-      !I_ACTVT type CLIKE
-    exceptions
-      ERROR .
-  methods ISAUTHORITY_AUART
-    importing
-      !I_AUART type AUART
-    exceptions
-      ERROR .
-  methods ISCONFIRM
-    importing
-      !I_QUESTION type STRING
-      !I_CANCEL type XFELD optional
-    exceptions
-      CANCEL .
-  methods IS_HANA .
-  methods IS_NUMERIC .
-  methods JOB .
-  methods LIST_CLASES .
-  methods LIST_FUNCTIONS .
-  methods LIST_PROGRAMS .
-  methods MAIL_BODYFROMTLINE
-    importing
-      !IT_LINE type TLINE_TAB
-    changing
-      !CT_BODY type BCSY_TEXT .
-  methods MAIL_HTMLFROMTABLE
-    importing
-      !I_CAMPOS type CLIKE
-      !IT_DET type TABLE
-      !I_COLOR type ANY optional
-    changing
-      !CT_BODY type BCSY_TEXT .
-  methods MAIL_PDFFROMSMARTFORM
-    importing
-      !IS_RETURN type SSFCRESCL
-    returning
-      value(RT_DATA) type BCSY_TEXT
-    exceptions
-      ERROR .
-  methods MAIL_READCONSTEXT
-    importing
-      !I_FORMAT type CLIKE
-      !I_PROGRAM type CLIKE
-    exporting
-      !ES_MAIL type GTTY_MAIL_Z .
-  methods MAIL_REPLACEVALUE
-    importing
-      !REPLACE type CLIKE
-      !WITH type ANY
-    changing
-      !INTO type CLIKE .
-  methods MAIL_SEND
-    importing
-      !I_SUBJECT type SO_OBJ_DES
-      !I_TYPE type SO_OBJ_TP default 'RAW'
-      !IT_BODY type BCSY_TEXT optional
-      !IT_DESTI type GTT_MAIL_DESTI
-      !IT_ATTACH type GTT_MAIL_ATTACH optional
-      !I_SENDER type UNAME optional
-      !I_SENDER_MAIL type AD_SMTPADR optional
-      !I_INMEDIATO type XFELD optional
-      !I_COMMIT type XFELD optional
-      !I_GETIDSEND type XFELD optional
-    exporting
-      !E_ERROR type FLAG
-      !E_MENSAJE type STRING
-      !E_RECTP type SOST-RECTP
-      !E_RECYR type SOST-RECYR
-      !E_RECNO type SOST-RECNO
-    exceptions
-      ERROR .
-  methods MEMORY
-    importing
-      !I_TIPO type CHAR01
-      !I_PROCESS type CLIKE
-    changing
-      !C_DATA type ANY .
-  methods MEMORY_BUFFER
-    importing
-      !I_TIPO type CHAR01
-      !I_PROCESS type CLIKE
-    changing
-      !C_DATA type ANY .
-  methods MEMORY_GET .
-  methods MESSAGE_SHOW .
-  methods MONTH_RANGE
-    importing
-      !I_DATE type DATUM
-    returning
-      value(R_DATE) type TRGR_DATE .
-  methods RATE_FOREIGNCURRENCY
-    importing
-      !I_DATE type SY-DATUM
-      !I_WAERS_O type WAERS
-      !I_WAERS_D type WAERS
-      !I_TYPE_OF_RATE type CHAR01
-      !I_MONTO type ANY
-    changing
-      !E_MONTO type ANY
-      !E_KURSF type ANY .
-  methods READTEXT
-    importing
-      !I_SO10 type CLIKE optional
-      !IS_THEAD type THEAD optional
-    exporting
-      !E_LINES type TLINE_TAB
-      !E_TEXT type STRING .
-  methods RETURN_FROMMESSAGE
-    changing
-      !CT_RETURN type BAPIRETTAB .
-  methods RETURN_FROMTEXT
-    importing
-      !V1 type CLIKE
-      !V2 type CLIKE
-      !V3 type CLIKE optional
-      !V4 type CLIKE optional
-      !V42 type CLIKE optional
-    changing
-      !CT_RETURN type BAPIRETTAB .
-  methods RETURN_SHOW
-    importing
-      !IT_RETURN type BAPIRETTAB .
-  methods RETURN_SHOWMESSAGE
-    importing
-      !IS_RETURN type BAPIRET2 optional .
-  methods SCREEN_BASIC .
-  methods SCREEN_BUTTON .
-  methods SCREEN_CHECKBOX .
-  methods SCREEN_GETFIELD
-    importing
-      !I_FIELD type CLIKE
-      !I_DYNNR type CLIKE
-    changing
-      !E_VALUE type ANY .
-  methods SCREEN_LISTBOX .
-  methods SCREEN_PF_STATUS .
-  methods SCREEN_REQUIRED .
-  methods SCREEN_TOOLBAR .
-  methods SCREEN_UPDATE
-    importing
-      !I_FIELD type CLIKE
-      !I_VALUE type CLIKE .
-  methods SMARTFORMS
-    importing
-      !I_FORMNAME type TDSFNAME
-      !I_PREVIEW type TDPREVIEW default 'X'
-      !I_TDDEST type RSPOPNAME default 'LP01'
-      !IT_CAB type STANDARD TABLE
-    exceptions
-      ERROR .
-  methods SNRO_NEXT
-    importing
-      !IS_INRI type INRI
-    changing
-      !R_NUMBER type CLIKE
-    exceptions
-      ERROR .
-  methods SUBMIT .
-  methods TABLE_DOWNLOAD .
-  methods TABLE_MODIFY .
-  methods TCODE_CJ13
-    importing
-      !I_POSID type POSID .
-  methods TCODE_FB03
-    importing
-      !I_BUKRS type BKPF-BUKRS
-      !I_BELNR type BKPF-BELNR
-      !I_GJAHR type BKPF-GJAHR .
-  methods TCODE_IE03
-    importing
-      !I_EQUNR type EQUNR .
-  methods TCODE_MB03
-    importing
-      !I_MBLNR type MBLNR
-      !I_MJAHR type MJAHR .
-  methods TCODE_MIR4
-    changing
-      !CT_TABLE type STANDARD TABLE .
-  methods TCODE_VA03
-    importing
-      !I_VBELN type VBAK-VBELN .
-  methods TLINE_SAVE
-    importing
-      !IS_THEAD type THEAD
-      !I_TEXTO type CLIKE
-    exceptions
-      ERROR .
-  methods TXT_DOWNLOAD
-    importing
-      !I_FILE type CLIKE
-      !I_SEPARATOR type XFELD
-      !I_APPEND type XFELD optional
-    changing
-      !CT_DATA type STANDARD TABLE
-    exceptions
-      ERROR .
-  methods TXT_UPLOAD
-    importing
-      !I_FILENAME type CLIKE
-      !I_SEPARATOR type CLIKE
-    changing
-      !RT_DATA type STANDARD TABLE
-    exceptions
-      ERROR .
-  methods TXT_UPLOADSERVER
-    importing
-      !I_FILENAME type STRING
-    changing
-      !CT_DATA type STANDARD TABLE
-    exceptions
-      ERROR .
-  methods UNIT_CONVERTMATERIAL
-    importing
-      !I_MATNR type MATNR
-      !I_MEINS_I type MEINS
-      !I_MEINS_O type MEINS
-      !I_MENGE type MENGE_D
-    changing
-      !R_MENGE type MENGE_D .
-  methods VALUE_DYNAMIC_GET
-    importing
-      !INPUT type CLIKE
-    changing
-      !OUT type ANY
-    exceptions
-      ERROR .
-  methods VIEW_CALL .
-  methods VIEW_CALLCLUSTER .
-  methods VIEW_CALLCONST .
-  methods VL02N_DELETE .
+    METHODS alvfast_show
+    CHANGING
+      !ct_table TYPE STANDARD TABLE
+      !ct_fcat TYPE lvc_t_fcat .
+    METHODS alvgrid_show .
+    METHODS alvlvc_excludest
+    CHANGING
+      !ct_excl TYPE slis_t_extab .
+    METHODS alvlvc_refresh
+    CHANGING
+      !cs_sel TYPE slis_selfield .
+    METHODS alvlvc_settop
+    IMPORTING
+      !i_typ TYPE string
+      !i_key TYPE string
+      !i_info TYPE any
+    CHANGING
+      !ct_head TYPE slis_t_listheader .
+    METHODS alvlvc_show
+    CHANGING
+      !ct_table TYPE STANDARD TABLE .
+    METHODS alvsalv_show
+    CHANGING
+      !ct_fcat TYPE lvc_t_fcat
+      !ct_table TYPE STANDARD TABLE .
+    METHODS alv_color
+    IMPORTING
+      !i_campo TYPE clike
+      !i_color TYPE i DEFAULT 3
+    RETURNING
+      VALUE(rt_cell) TYPE lvc_t_scol .
+    METHODS alv_fcatgen
+    EXPORTING
+      !et_fcat TYPE lvc_t_fcat
+    CHANGING
+      !ct_table TYPE STANDARD TABLE
+      !c_campo TYPE clike OPTIONAL .
+    METHODS alv_fcatname
+    IMPORTING
+      !i_unico TYPE clike
+      !i_large TYPE clike OPTIONAL
+    CHANGING
+      !cs_fcat TYPE lvc_s_fcat .
+    METHODS alv_style
+    IMPORTING
+      !i_campo TYPE clike OPTIONAL
+      !i_style TYPE lvc_style DEFAULT cl_gui_alv_grid=>mc_style_disabled
+    CHANGING
+      !ct_cell TYPE lvc_t_styl .
+    METHODS amp_me21n
+    IMPORTING
+      !io_item TYPE REF TO if_purchase_order_item_mm .
+    METHODS bapi_datax .
+    METHODS bapi_save
+    IMPORTING
+      !it_return TYPE bapirettab
+      !i_number TYPE i OPTIONAL
+    EXPORTING
+      !e_icon TYPE icon-id
+      !e_message TYPE string
+    CHANGING
+      !ct_return TYPE bapirettab OPTIONAL
+    EXCEPTIONS
+      error .
+    METHODS batch_call
+    IMPORTING
+      !i_tcode TYPE clike
+      !is_param TYPE ctu_params OPTIONAL
+      !i_number TYPE i OPTIONAL
+    EXPORTING
+      !e_icon TYPE icon-id
+      !e_message TYPE string
+    CHANGING
+      !ct_return TYPE bapirettab OPTIONAL
+    EXCEPTIONS
+      error .
+    METHODS batch_dynpro
+    IMPORTING
+      !i_program TYPE clike
+      !i_dynpro TYPE clike
+      !i_key TYPE clike OPTIONAL .
+    METHODS batch_field
+    IMPORTING
+      !i_field TYPE clike
+      !i_index TYPE any OPTIONAL
+      !i_value TYPE any .
+    METHODS batch_rutina .
+    METHODS const_range_set
+    IMPORTING
+      !is_const TYPE zostb_constantes
+    CHANGING
+      !cr_range TYPE STANDARD TABLE .
+    METHODS convert_to_string
+    IMPORTING
+      !in TYPE any
+    RETURNING
+      VALUE(out) TYPE string .
+    METHODS cursor_parallel .
+    METHODS cursor_select .
+    METHODS date_fromchar
+    IMPORTING
+      !i_fecha TYPE clike
+    CHANGING
+      !e_datum TYPE datum .
+    METHODS date_interval
+    IMPORTING
+      !i_datum TYPE sy-datum
+      !i_day TYPE numc2 OPTIONAL
+      !i_month TYPE numc2 OPTIONAL
+      !i_sign TYPE char01 DEFAULT '+'
+      !i_year TYPE numc2 OPTIONAL
+    RETURNING
+      VALUE(e_datum) TYPE sy-datum .
+    METHODS date_startend
+    IMPORTING
+      !i_date TYPE datum
+    CHANGING
+      !e_fecini TYPE datum OPTIONAL
+      !e_fecfin TYPE datum OPTIONAL.
+    METHODS dynamic_select .
+    METHODS dynpro .
+    METHODS dynpro_forzar_pbo .
+    METHODS dynpro_help .
+    METHODS excel_upload .
+    METHODS excel_uploadeasy
+    IMPORTING
+      !i_filename TYPE clike
+    CHANGING
+      !rt_data TYPE STANDARD TABLE .
+    METHODS f4_field .
+    METHODS field_getdynamic
+    IMPORTING
+      !i_field TYPE clike
+      !is_line TYPE any
+    CHANGING
+      !e_out TYPE any .
+    METHODS file_browser
+    CHANGING
+      !c_dir TYPE clike
+    EXCEPTIONS
+      error .
+    METHODS file_exist
+    IMPORTING
+      !i_file TYPE clike
+    CHANGING
+      !e_subrc TYPE sy-subrc
+    EXCEPTIONS
+      error .
+    METHODS find_regex .
+    METHODS folder_listfiles
+    IMPORTING
+      !i_dir TYPE clike
+    CHANGING
+      !et_file TYPE db2_t_string .
+    METHODS hana_range .
+    METHODS hana_select .
+    METHODS input_data
+    IMPORTING
+      !i_title TYPE clike
+      !i_tab TYPE clike
+      !i_field TYPE clike
+    EXPORTING
+      !e_value TYPE clike
+    EXCEPTIONS
+      cancel .
+    METHODS isauthorithy_vkorg
+    IMPORTING
+      !i_vkorg TYPE vkorg
+      !i_vtweg TYPE vtweg
+      !i_spart TYPE spart
+      !i_actvt TYPE clike
+    EXCEPTIONS
+      error .
+    METHODS isauthority_auart
+    IMPORTING
+      !i_auart TYPE auart
+    EXCEPTIONS
+      error .
+    METHODS isconfirm
+    IMPORTING
+      !i_question TYPE string
+      !i_cancel TYPE xfeld OPTIONAL
+    EXCEPTIONS
+      cancel .
+    METHODS is_hana .
+    METHODS is_numeric .
+    METHODS job .
+    METHODS list_clases .
+    METHODS list_functions .
+    METHODS list_programs .
+    METHODS mail_bodyfromtline
+    IMPORTING
+      !it_line TYPE tline_tab
+    CHANGING
+      !ct_body TYPE bcsy_text .
+    METHODS mail_htmlfromtable
+    IMPORTING
+      !i_campos TYPE clike
+      !it_det TYPE table
+      !i_color TYPE any OPTIONAL
+    CHANGING
+      !ct_body TYPE bcsy_text .
+    METHODS mail_pdffromsmartform
+    IMPORTING
+      !is_return TYPE ssfcrescl
+    RETURNING
+      VALUE(rt_data) TYPE bcsy_text
+    EXCEPTIONS
+      error .
+    METHODS mail_readconstext
+    IMPORTING
+      !i_format TYPE clike
+      !i_program TYPE clike
+    EXPORTING
+      !es_mail TYPE gtty_mail_data .
+    METHODS mail_replacevalue
+    IMPORTING
+      !replace TYPE clike
+      !with TYPE any
+    CHANGING
+      !into TYPE clike .
+    METHODS mail_send
+    IMPORTING
+      !is_mail TYPE gtty_mail_data
+      !i_type TYPE so_obj_tp DEFAULT 'RAW'
+      !i_inmediato TYPE xfeld OPTIONAL
+      !i_commit TYPE xfeld OPTIONAL
+    EXCEPTIONS
+      error .
+    METHODS memory
+    IMPORTING
+      !i_tipo TYPE char01
+      !i_process TYPE clike
+    CHANGING
+      !c_data TYPE any .
+    METHODS memory_buffer
+    IMPORTING
+      !i_tipo TYPE char01
+      !i_process TYPE clike
+    CHANGING
+      !c_data TYPE any .
+    METHODS memory_get .
+    METHODS message_show .
+    METHODS month_range
+    IMPORTING
+      !i_date TYPE datum
+    RETURNING
+      VALUE(r_date) TYPE trgr_date .
+    METHODS convert_currency
+    IMPORTING
+      !i_date TYPE dats
+      !i_waers_in TYPE waers
+      !i_monto_in TYPE dmbtr
+      !i_waers_ou TYPE waers
+    EXPORTING
+      !e_monto_ou TYPE dmbtr.
+    METHODS readtext
+    IMPORTING
+      !i_so10 TYPE clike OPTIONAL
+      !is_thead TYPE thead OPTIONAL
+    EXPORTING
+      !e_lines TYPE tline_tab
+      !e_text TYPE string .
+    METHODS return_frommessage
+    CHANGING
+      !ct_return TYPE bapirettab .
+    METHODS return_fromtext
+    IMPORTING
+      !v1 TYPE clike
+      !v2 TYPE clike
+      !v3 TYPE clike OPTIONAL
+      !v4 TYPE clike OPTIONAL
+      !v42 TYPE clike OPTIONAL
+    CHANGING
+      !ct_return TYPE bapirettab .
+    METHODS return_show
+    IMPORTING
+      !it_return TYPE bapirettab .
+    METHODS return_showmessage
+    IMPORTING
+      !is_return TYPE bapiret2 OPTIONAL .
+    METHODS screen_basic .
+    METHODS screen_button .
+    METHODS screen_checkbox .
+    METHODS screen_getfield
+    IMPORTING
+      !i_field TYPE clike
+      !i_dynnr TYPE clike
+    CHANGING
+      !e_value TYPE any .
+    METHODS screen_listbox .
+    METHODS screen_pf_status .
+    METHODS screen_required .
+    METHODS screen_toolbar .
+    METHODS screen_update
+    IMPORTING
+      !i_field TYPE clike
+      !i_value TYPE clike .
+    METHODS smartforms
+    IMPORTING
+      !i_formname TYPE tdsfname
+      !i_preview TYPE tdpreview DEFAULT 'X'
+      !i_tddest TYPE rspopname DEFAULT 'LP01'
+      !it_cab TYPE STANDARD TABLE
+    EXCEPTIONS
+      error .
+    METHODS snro_next
+    IMPORTING
+      !is_inri TYPE inri
+    CHANGING
+      !r_number TYPE clike
+    EXCEPTIONS
+      error .
+    METHODS submit .
+    METHODS table_download .
+    METHODS table_modify .
+    METHODS tcode_cj13
+    IMPORTING
+      !i_posid TYPE posid .
+    METHODS tcode_fb03
+    IMPORTING
+      !i_bukrs TYPE bkpf-bukrs
+      !i_belnr TYPE bkpf-belnr
+      !i_gjahr TYPE bkpf-gjahr .
+    METHODS tcode_ie03
+    IMPORTING
+      !i_equnr TYPE equnr .
+    METHODS tcode_mb03
+    IMPORTING
+      !i_mblnr TYPE mblnr
+      !i_mjahr TYPE mjahr .
+    METHODS tcode_mir4
+    CHANGING
+      !ct_table TYPE STANDARD TABLE .
+    METHODS tcode_va03
+    IMPORTING
+      !i_vbeln TYPE vbak-vbeln .
+    METHODS tline_save
+    IMPORTING
+      !is_thead TYPE thead
+      !i_texto TYPE clike
+    EXCEPTIONS
+      error .
+    METHODS txt_download
+    IMPORTING
+      !i_file TYPE clike
+      !i_separator TYPE xfeld
+      !i_append TYPE xfeld OPTIONAL
+    CHANGING
+      !ct_data TYPE STANDARD TABLE
+    EXCEPTIONS
+      error .
+    METHODS txt_upload
+    IMPORTING
+      !i_filename TYPE clike
+      !i_separator TYPE clike
+    CHANGING
+      !rt_data TYPE STANDARD TABLE
+    EXCEPTIONS
+      error .
+    METHODS txt_uploadserver
+    IMPORTING
+      !i_filename TYPE string
+    CHANGING
+      !ct_data TYPE STANDARD TABLE
+    EXCEPTIONS
+      error .
+    METHODS unit_convertmaterial
+    IMPORTING
+      !i_matnr TYPE matnr
+      !i_meins_in TYPE meins
+      !i_meins_ou TYPE meins
+      !i_menge_in TYPE menge_d
+    CHANGING
+      !r_menge_ou TYPE menge_d .
+    METHODS value_dynamic_get
+    IMPORTING
+      !input TYPE clike
+    CHANGING
+      !out TYPE any
+    EXCEPTIONS
+      error .
+    METHODS view_call .
+    METHODS view_callcluster .
+    METHODS view_callconst .
+    METHODS vl02n_delete .
   PROTECTED SECTION.
-private section.
+  PRIVATE SECTION.
 ENDCLASS.
 
 
@@ -886,7 +853,7 @@ CLASS lcl_util IMPLEMENTATION.
         ls_key-handle = sy-dynnr.
         lo_func->set_all( ).
         lo_layo->set_key( ls_key ).
-        lo_layo->set_save_restriction( 3 ).
+        lo_layo->set_save_restriction( if_salv_c_layout=>restrict_none ).
 
         "04. Fcat
         cl_salv_controller_metadata=>set_lvc_fieldcatalog( t_fieldcatalog = ct_fcat r_columns = lo_cols r_aggregations = lo_aggr ).
@@ -959,7 +926,7 @@ CLASS lcl_util IMPLEMENTATION.
             ENDIF.
           ELSE.
             APPEND ls_fcat TO et_fcat.
-          ENDIF.          
+          ENDIF.
         ENDLOOP.
       CATCH cx_root.
     ENDTRY.
@@ -1109,7 +1076,7 @@ CLASS lcl_util IMPLEMENTATION.
     DATA: lt_bdcret TYPE TABLE OF bdcmsgcoll,
           ls_param  TYPE ctu_params.
 
-    REFRESH gt_batchret.
+    FREE gt_batchret.
 
     IF is_param IS INITIAL.
       ls_param-dismode = 'N'.
@@ -1128,7 +1095,7 @@ CLASS lcl_util IMPLEMENTATION.
         imt_bdcmsgcoll = lt_bdcret
         ext_return     = gt_batchret.
 
-    REFRESH gt_batch.
+    FREE gt_batch.
 
     bapi_save(
       EXPORTING
@@ -1363,8 +1330,8 @@ CLASS lcl_util IMPLEMENTATION.
 * | [--->] I_YEAR                         TYPE        NUMC2(optional)
 * | [<-()] E_DATUM                        TYPE        SY-DATUM
 * +--------------------------------------------------------------------------------------</SIGNATURE>
-METHOD date_interval.
-  CALL FUNCTION 'RP_CALC_DATE_IN_INTERVAL'
+  METHOD date_interval.
+    CALL FUNCTION 'RP_CALC_DATE_IN_INTERVAL'
     EXPORTING
       date      = i_datum
       days      = i_day
@@ -1373,7 +1340,7 @@ METHOD date_interval.
       years     = i_year
     IMPORTING
       calc_date = e_datum.
-ENDMETHOD.
+  ENDMETHOD.
 
 
 * <SIGNATURE>---------------------------------------------------------------------------------------+
@@ -1890,7 +1857,7 @@ ENDMETHOD.
 * | [EXC!] ERROR
 * +--------------------------------------------------------------------------------------</SIGNATURE>
   METHOD mail_pdffromsmartform.
-*----------------------------------------------------------------------*
+**----------------------------------------------------------------------*
 *** EXAMPLE
 **    DATA: l_fn_name TYPE rs38l_fnam,
 **          ls_control  TYPE ssfctrlop,
@@ -1911,7 +1878,6 @@ ENDMETHOD.
 *** Parametro de impresion
 **    ls_control-getotf    = abap_on.
 **    ls_control-no_dialog = abap_on.
-**    ls_control-device    = 'PRINTER'.    "Constante
 **
 *** Opcion para control spool
 **    ls_options-tddest    = 'LP01'.       "Constante
@@ -1936,40 +1902,36 @@ ENDMETHOD.
 **
 **    APPEND LINES OF go_util->mail_pdffromsmartform( ls_return ) TO lt_pdf.
 **----------------------------------------------------------------------*
-    DATA: lt_otf   TYPE TABLE OF itcoo,
-          lt_lines TYPE TABLE OF tline,
-          ls_lines LIKE LINE OF lt_lines.
-
-    DATA: l_bin_len TYPE sood-objlen,
-          l_buffer  TYPE string,
-          l_text    TYPE soli-line.
+    DATA: lt_otf  TYPE TABLE OF itcoo,
+          lt_line TYPE TABLE OF tline,
+          l_data  TYPE xstring.
 
     "1. Convierte a pdf
-    lt_otf[] = is_return-otfdata[].
+    lt_otf = it_otf.
 
     CALL FUNCTION 'CONVERT_OTF'
       EXPORTING
-        format                = 'ASCII'
-        max_linewidth         = 132
+        format                = 'PDF'
       IMPORTING
-        bin_filesize          = l_bin_len
+        bin_file              = l_data
       TABLES
         otf                   = lt_otf
-        lines                 = lt_lines
+        lines                 = lt_line
       EXCEPTIONS
         err_max_linewidth     = 1
         err_format            = 2
         err_conv_not_possible = 3
-        err_bad_otf           = 4
-        OTHERS                = 5.
+        OTHERS                = 4.
     IF sy-subrc <> 0.
       RAISE error.
     ENDIF.
 
     "2. Retornar
-    LOOP AT lt_lines INTO ls_lines.
-      APPEND ls_lines-tdline TO rt_data.
-    ENDLOOP.
+    CALL FUNCTION 'SCMS_XSTRING_TO_BINARY'
+      EXPORTING
+        buffer     = l_data
+      TABLES
+        binary_tab = rt_data.
 
   ENDMETHOD.                    "mail_pdffromsmartform
 
@@ -1979,7 +1941,7 @@ ENDMETHOD.
 * +-------------------------------------------------------------------------------------------------+
 * | [--->] I_FORMAT                       TYPE        CLIKE
 * | [--->] I_PROGRAM                      TYPE        CLIKE
-* | [<---] ES_MAIL                        TYPE        GTTY_MAIL_Z
+* | [<---] ES_MAIL                        TYPE        gtty_mail_data
 * +--------------------------------------------------------------------------------------</SIGNATURE>
   METHOD mail_readconstext.
     DATA: lt_const TYPE TABLE OF zostb_textconst,
@@ -2042,92 +2004,60 @@ ENDMETHOD.
   ENDMETHOD.                    "mail_replacevalue
 
 
-* <SIGNATURE>---------------------------------------------------------------------------------------+
-* | Instance Public Method lcl_util->MAIL_SEND
-* +-------------------------------------------------------------------------------------------------+
-* | [--->] I_SUBJECT                      TYPE        SO_OBJ_DES
-* | [--->] I_TYPE                         TYPE        SO_OBJ_TP (default ='RAW')
-* | [--->] IT_BODY                        TYPE        BCSY_TEXT(optional)
-* | [--->] IT_DESTI                       TYPE        GTT_MAIL_DESTI
-* | [--->] IT_ATTACH                      TYPE        GTT_MAIL_ATTACH(optional)
-* | [--->] I_SENDER                       TYPE        UNAME(optional)
-* | [--->] I_SENDER_MAIL                  TYPE        AD_SMTPADR(optional)
-* | [--->] I_INMEDIATO                    TYPE        XFELD(optional)
-* | [--->] I_COMMIT                       TYPE        XFELD(optional)
-* | [--->] I_GETIDSEND                    TYPE        XFELD(optional)
-* | [<---] E_ERROR                        TYPE        FLAG
-* | [<---] E_MENSAJE                      TYPE        STRING
-* | [<---] E_RECTP                        TYPE        SOST-RECTP
-* | [<---] E_RECYR                        TYPE        SOST-RECYR
-* | [<---] E_RECNO                        TYPE        SOST-RECNO
-* | [EXC!] ERROR
-* +--------------------------------------------------------------------------------------</SIGNATURE>
   METHOD mail_send.
     CLASS cl_cam_address_bcs DEFINITION LOAD.
 
-    DATA: lo_mail            TYPE REF TO cl_bcs,
-          lo_doc             TYPE REF TO cl_document_bcs,
-          lo_attach          TYPE REF TO cl_document_bcs,
-          lo_desti           TYPE REF TO if_recipient_bcs,
-          lo_remi            TYPE REF TO cl_sapuser_bcs,
-          lo_remi_e          TYPE REF TO cl_cam_address_bcs,
-          lo_exc             TYPE REF TO cx_bcs,
-          l_requested_status TYPE os_boolean,
-          l_status           TYPE bcs_stml,
-          l_message          TYPE string.
+    DATA: lo_mail   TYPE REF TO cl_bcs,
+          lo_doc    TYPE REF TO cl_document_bcs,
+          lo_attach TYPE REF TO cl_document_bcs,
+          lo_desti  TYPE REF TO if_recipient_bcs,
+          lo_remi   TYPE REF TO cl_sapuser_bcs,
+          lo_remi_e TYPE REF TO cl_cam_address_bcs,
+          lo_exc    TYPE REF TO cx_bcs,
+          l_message TYPE string.
 
     DATA: lt_desti  TYPE gtt_mail_desti,
           lt_desti2 TYPE gtt_mail_desti.
-    DATA: ls_desti       LIKE LINE OF it_desti,
-          ls_attach      LIKE LINE OF it_attach,
+    DATA: ls_desti       TYPE gtty_mail_desti,
+          ls_attach      TYPE gtty_mail_attach,
           l_address_name TYPE adr6-smtp_addr,
           l_desti        TYPE xfeld.
 
     FIELD-SYMBOLS: <fs_desti> LIKE LINE OF lt_desti.
 
-    "Hallar ID de correo
-    DATA: l_send_request_aux TYPE REF TO cl_send_request_bcs,
-          les_db_table       TYPE bcst_sr,
-          l_my_cls           TYPE os_guid,
-          ls_sood            TYPE sood,
-          l_result           TYPE so_obj_id.
     "Validaciones
-    IF it_desti[] IS INITIAL.
+    IF is_mail-desti IS INITIAL.
       MESSAGE 'No hay destinarios' TYPE 'E' RAISING error.
     ENDIF.
 
 
     "Build y Envio de Mail
     TRY.
-        "1. Instancia
         lo_mail = cl_bcs=>create_persistent( ).
 
-        "1.0 Remitente
-        "Otro usuario
-        IF i_sender <> space.
-          lo_remi = cl_sapuser_bcs=>create( i_sender ).
+        "1.1 Remitente
+        IF is_mail-cab-sender <> space.
+          lo_remi = cl_sapuser_bcs=>create( is_mail-cab-sender ).
           lo_mail->set_sender( lo_remi ).
         ENDIF.
-
-        "Otro email
-        IF i_sender_mail <> space.
-          lo_remi_e = cl_cam_address_bcs=>create_internet_address( i_sender_mail ).
+        IF is_mail-cab-sender_mail <> space.
+          lo_remi_e = cl_cam_address_bcs=>create_internet_address( is_mail-cab-sender_mail ).
           lo_mail->set_sender( lo_remi_e ).
         ENDIF.
 
-        "1.1 Adjunta titulo de correo y cuerpo
-        lo_doc = cl_document_bcs=>create_document( i_type    = i_type       "RAW, HTM
-                                                   i_text    = it_body      "Mensaje
-                                                   i_subject = i_subject ). "Titulo
+        "1.2 Adjunta titulo de correo y cuerpo
+        lo_doc = cl_document_bcs=>create_document( i_type    = i_type                 "RAW, HTM
+                                                   i_text    = is_mail-cuerpo         "Mensaje
+                                                   i_subject = is_mail-cab-subject ). "Titulo
 
-        "1.2 Adjunta archivos
-        LOOP AT it_attach INTO ls_attach.
+        "1.3 Adjunta archivos
+        LOOP AT is_mail-attach INTO ls_attach.
           "Adjunto tipo1
           IF ls_attach-attach IS NOT INITIAL.
             lo_attach = cl_document_bcs=>create_document( i_type    = ls_attach-tipo
                                                           i_text    = ls_attach-attach
                                                           i_subject = ls_attach-titulo ).
-            "Adjunto tipo2
+          "Adjunto tipo2
           ELSEIF ls_attach-attach_hex IS NOT INITIAL.
             lo_attach = cl_document_bcs=>create_document( i_type    = ls_attach-tipo
                                                           i_hex     = ls_attach-attach_hex
@@ -2137,12 +2067,12 @@ ENDMETHOD.
         ENDLOOP.
 
 
-        "1.3 Adjunta al objeto principal
+        "1.4 Adjunta al objeto principal
         lo_mail->set_document( lo_doc ).
 
 
         "2. Adjunta destinatarios
-        lt_desti = it_desti.
+        lt_desti = is_mail-desti.
         LOOP AT lt_desti INTO ls_desti.
 
           "2.1. Direccion de email
@@ -2151,7 +2081,6 @@ ENDMETHOD.
             lo_desti = cl_cam_address_bcs=>create_internet_address(
                i_address_string = ls_desti-email
                i_address_name   = l_address_name
-               "i_incl_sapuser   =
             ).
 
             "2.2. Usuario sap obtener mail por clase
@@ -2202,57 +2131,22 @@ ENDMETHOD.
 
 
         "3. Envio de mail
-        IF i_getidsend IS NOT INITIAL.
-          l_status = 'N'.
-          lo_mail->set_status_attributes( i_requested_status = l_status
-                                          i_status_mail      = l_status ).
+        lo_mail->send_request->set_link_to_outbox( 'X' ).
+        lo_mail->send( ).
 
-          lo_mail->send_request->set_link_to_outbox( 'X' ).
-          l_requested_status = lo_mail->send( abap_on ).
+        "Commit Work
+        IF i_commit <> space.
+          COMMIT WORK.
+        ENDIF.
 
-          IF l_requested_status = 'X'.
-            e_error   = space.
-            e_mensaje = 'A la espera de envío del correo a destinatario'.
-            COMMIT WORK AND WAIT.
-          ELSE.
-            e_error   = abap_on.
-            e_mensaje = 'Error en envío'.
-          ENDIF.
-
-          "Numero Unico de envio
-          l_my_cls = lo_mail->send_request->getu_oid( ).
-
-          "Hallar los datos del ID generado de envío para saber si fue enviado exitosamente o no
-          DO.
-            SELECT SINGLE rectp recyr recno
-              INTO (e_rectp, e_recyr, e_recno)
-              FROM soos
-              WHERE sndreq = l_my_cls.
-            IF sy-subrc = 0. EXIT. ENDIF.
-            WAIT UP TO 1 SECONDS.
-            IF sy-index > 10. EXIT. ENDIF.
-          ENDDO.
-
-        ELSE.
-          lo_mail->send_request->set_link_to_outbox( 'X' ).
-          lo_mail->send( ).
-
-          "Commit Work
-          IF i_commit <> space.
-            COMMIT WORK.
-          ENDIF.
-
-          "Forzar envio inmediato
-          IF i_inmediato <> space.
-            SUBMIT rsconn01 WITH mode = 'INT' AND RETURN.
-          ENDIF.
+        "Forzar envio inmediato
+        IF i_inmediato <> space.
+          SUBMIT rsconn01 WITH mode = 'INT' AND RETURN.
         ENDIF.
 
         "Manejo de excepcion
       CATCH cx_bcs INTO lo_exc.
         l_message = lo_exc->get_text( ).
-        e_error   = abap_on.
-        e_mensaje = l_message.
         MESSAGE l_message TYPE 'E' RAISING error.
     ENDTRY.
   ENDMETHOD.                    "mail_send
@@ -2361,7 +2255,7 @@ ENDMETHOD.
 
 
 * <SIGNATURE>---------------------------------------------------------------------------------------+
-* | Instance Public Method lcl_util->RATE_FOREIGNCURRENCY
+* | Instance Public Method lcl_util->convert_currency
 * +-------------------------------------------------------------------------------------------------+
 * | [--->] I_DATE                         TYPE        SY-DATUM
 * | [--->] I_WAERS_O                      TYPE        WAERS
@@ -2371,57 +2265,28 @@ ENDMETHOD.
 * | [<-->] E_MONTO                        TYPE        ANY
 * | [<-->] E_KURSF                        TYPE        ANY
 * +--------------------------------------------------------------------------------------</SIGNATURE>
-  METHOD rate_foreigncurrency.
-    DATA: ls_rate LIKE LINE OF gth_rate.
-
-    "0. Tipo
-    ls_rate-type_of_rate = i_type_of_rate.
-    IF ls_rate-type_of_rate IS INITIAL.
-      ls_rate-type_of_rate = 'M'.
-    ENDIF.
-
-    "1. Monedas iguales
-    IF i_waers_d = i_waers_o.
-      e_kursf = 1.
-      e_monto   = i_monto.
-      RETURN.
-    ENDIF.
-
-    "2. Monedas distintas
-    "01. Leer lo almacenado
-    READ TABLE gth_rate INTO ls_rate WITH TABLE KEY date    = i_date
-                                                    waers_o = i_waers_o
-                                                    waers_d = i_waers_d
-                                                    type_of_rate = ls_rate-type_of_rate.
-    IF sy-subrc = 0.
-      IF ls_rate-kursf <> 0.
-        e_kursf = ls_rate-kursf.
-        e_monto = i_monto / ls_rate-kursf.
-      ENDIF.
-    ELSE.
-      CALL FUNCTION 'CONVERT_TO_FOREIGN_CURRENCY'
+  METHOD convert_currency.
+    IF i_waers_in <> i_waers_ou.
+      CALL FUNCTION 'CONVERT_TO_LOCAL_CURRENCY'
         EXPORTING
           date             = i_date
-          foreign_currency = i_waers_d
-          local_amount     = i_monto
-          local_currency   = i_waers_o
-          type_of_rate     = ls_rate-type_of_rate
+          foreign_currency = i_waers_in
+          foreign_amount   = i_monto_in
+          local_currency   = i_waers_ou
         IMPORTING
-          exchange_rate    = e_kursf
-          foreign_amount   = e_monto
+          local_amount     = r_monto_ou
         EXCEPTIONS
           no_rate_found    = 1
           overflow         = 2
           no_factors_found = 3
           no_spread_found  = 4
           derived_2_times  = 5.
-
-      "01.01. Guardar para consultas rapidas
-      ls_rate-date    = i_date.
-      ls_rate-waers_o = i_waers_o.
-      ls_rate-waers_d = i_waers_d.
-      ls_rate-kursf   = e_kursf.
-      INSERT ls_rate INTO TABLE gth_rate.
+      IF sy-subrc <> 0.
+        MESSAGE ID sy-msgid TYPE sy-msgty NUMBER sy-msgno
+                 WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+      ENDIF.
+    ELSE.
+      r_monto_ou = i_monto_in.
     ENDIF.
   ENDMETHOD.
 
@@ -2756,7 +2621,6 @@ ENDMETHOD.
 
     "2. Abrir
     "Parametro de impresion
-    ls_control_param-device   = 'PRINTER'.    "Imprimir
     ls_control_param-preview  = i_preview.    "Mostrar preview
     ls_control_param-no_open  = 'X'.          "Abrir
     ls_control_param-no_close = 'X'.          "No cerrar
@@ -3191,37 +3055,21 @@ ENDMETHOD.
 * | [<-->] R_MENGE                        TYPE        MENGE_D
 * +--------------------------------------------------------------------------------------</SIGNATURE>
   METHOD unit_convertmaterial.
-    DATA: ls_unit LIKE LINE OF gth_unit.
+    CALL FUNCTION 'MD_CONVERT_MATERIAL_UNIT'
+      EXPORTING
+        i_matnr              = i_matnr
+        i_in_me              = i_meins_in
+        i_out_me             = i_meins_ou
+        i_menge              = 1
+      IMPORTING
+        e_menge              = r_menge_ou
+      EXCEPTIONS
+        error_in_application = 1
+        error                = 2
+        OTHERS               = 3.
 
-    "01. Leer lo almacenado
-    READ TABLE gth_unit INTO ls_unit WITH TABLE KEY matnr = i_matnr
-                                                    meins_i = i_meins_i
-                                                    meins_o = i_meins_o.
-    IF sy-subrc = 0.
-      r_menge = i_menge * ls_unit-menge.
-    ELSE.
-      CALL FUNCTION 'MD_CONVERT_MATERIAL_UNIT'
-        EXPORTING
-          i_matnr              = i_matnr
-          i_in_me              = i_meins_i
-          i_out_me             = i_meins_o
-          i_menge              = 1
-        IMPORTING
-          e_menge              = ls_unit-menge
-        EXCEPTIONS
-          error_in_application = 1
-          error                = 2
-          OTHERS               = 3.
 
-      "01.01. Cantidad
-      r_menge = i_menge * ls_unit-menge.
-
-      "01.02. Guardar para consultas rapidas
-      ls_unit-matnr = i_matnr.
-      ls_unit-meins_i = i_meins_i.
-      ls_unit-meins_o = i_meins_o.
-      INSERT ls_unit INTO TABLE gth_unit.
-    ENDIF.
+    r_menge_ou = i_menge_in * r_menge_ou.
   ENDMETHOD.
 
 

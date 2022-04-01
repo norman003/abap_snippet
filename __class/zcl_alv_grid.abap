@@ -3,12 +3,6 @@
 *----------------------------------------------------------------------*
 CLASS lcr_100 DEFINITION.
   PUBLIC SECTION.
-  
-    "Alv
-    DATA: go_container TYPE REF TO cl_gui_custom_container, "grid "cl_gui_docking_container, "dock
-          go_alv TYPE REF TO cl_gui_alv_grid.
-    METHODS: constructor.
-    METHODS: r_alv_show. "grid
     
 *----------------------------------------------------------------------*
 * Declaracion
@@ -24,33 +18,40 @@ CLASS lcr_100 DEFINITION.
            
     "Objetos
     "Public
-    METHODS getdata.
+    METHODS constructor.
+    METHODS report.
     METHODS uc.
 
 *----------------------------------------------------------------------*
 * Protected
 *----------------------------------------------------------------------*
   PROTECTED SECTION.
-    METHODS r_alvevent_toolbar FOR EVENT toolbar OF cl_gui_alv_grid IMPORTING e_object e_interactive.
-    METHODS r_alvevent_menu   FOR EVENT menu_button OF cl_gui_alv_grid IMPORTING e_object e_ucomm.
-    METHODS r_alvevent_uc     FOR EVENT user_command OF cl_gui_alv_grid IMPORTING e_ucomm.
-    METHODS r_alvevent_click  FOR EVENT hotspot_click OF cl_gui_alv_grid IMPORTING e_row_id e_column_id.
-    METHODS r_alvevent_double FOR EVENT double_click OF cl_gui_alv_grid IMPORTING e_row e_column.
-    METHODS r_alv_changing    FOR EVENT data_changed OF cl_gui_alv_grid IMPORTING er_data_changed,
-    METHODS r_alv_changed     FOR EVENT data_changed_finished OF cl_gui_alv_grid IMPORTING e_modified et_good_cells,
-    METHODS r_alv_f4          FOR EVENT onf4 OF cl_gui_alv_grid IMPORTING e_fieldname e_fieldvalue es_row_no er_event_data et_bad_cells e_display.
+    METHODS r_alvevent_uc       FOR EVENT user_command OF cl_gui_alv_grid IMPORTING e_ucomm.
+    METHODS r_alvevent_click    FOR EVENT hotspot_click OF cl_gui_alv_grid IMPORTING e_row_id e_column_id.
+      
+    METHODS r_alvevent_changing FOR EVENT data_changed OF cl_gui_alv_grid IMPORTING er_data_changed,
+    METHODS r_alvevent_changed  FOR EVENT data_changed_finished OF cl_gui_alv_grid IMPORTING e_modified et_good_cells,
+    METHODS r_alvevent_f4       FOR EVENT onf4 OF cl_gui_alv_grid IMPORTING e_fieldname e_fieldvalue es_row_no er_event_data et_bad_cells e_display.
+    
+    METHODS r_alvevent_toolbar  FOR EVENT toolbar OF cl_gui_alv_grid IMPORTING e_object e_interactive.
+    METHODS r_alvevent_menu     FOR EVENT menu_button OF cl_gui_alv_grid IMPORTING e_object e_ucomm.
+    METHODS r_alvevent_double   FOR EVENT double_click OF cl_gui_alv_grid IMPORTING e_row e_column.
 
 *----------------------------------------------------------------------*
 * Privada
 *----------------------------------------------------------------------*
   PRIVATE SECTION.
     "Alv
-    DATA: gs_stable TYPE lvc_s_stbl VALUE 'XX',
-          g_dynnr   TYPE sydynnr.
+    DATA: go_container TYPE REF TO cl_gui_custom_container, "grid "cl_gui_docking_container, "dock
+          go_alv       TYPE REF TO cl_gui_alv_grid.
+          g_dynnr      TYPE sydynnr.
           "g_ratio   TYPE i. "dock
           "g_extension TYPE i. "dock
           "g_side    TYPE i. "dock
+
     "METHODS r_alv_show. "dock
+    METHODS: r_alv_show.
+             refresh.
     
 ENDCLASS.
 
@@ -73,125 +74,125 @@ CLASS lcr_100 IMPLEMENTATION.
 * Alv show
 *----------------------------------------------------------------------*
   METHOD r_alv_show.
-    DATA: ls_layo TYPE lvc_s_layo,
-          lt_fcat TYPE lvc_t_fcat,
-          ls_vari TYPE disvariant.
+    DATA: lslayo TYPE lvc_s_layo,
+          ltfcat TYPE lvc_t_fcat,
+          lsvari TYPE disvariant.
           "lt_excl TYPE lvc_t_excl,
           "lt_f4   TYPE lvc_t_f4,
           "ls_f4   LIKE LINE OF lt_f4.
           "lt_sort TYPE lvc_t_sort,
           "ls_sort LIKE LINE OF lt_sort.
-    FIELD-SYMBOLS: <fs_fcat> TYPE lvc_s_fcat.
+    FIELD-SYMBOLS: <fsfcat> TYPE lvc_s_fcat.
 
-    IF go_alv IS NOT BOUND.
+    "Layout
+    lslayo-zebra       = abap_on.
+    "lslayo-cwidth_opt = abap_on.
+    "lslayo-col_opt    = abap_on.
+    "lslayo-no_rowmark = abap_on.
+    "lslayo-box_fname  = 'SELEC'.
+    "lslayo-ctab_fname = 'CELLCOLOR'.
+    "lslayo-stylefname = 'CELLSTYLE'.
+    "lslayo-info_fname = 'COLOR'.       ls_report-color = 'C700'.
+    "lslayo-grid_title = 'Reporte'.
+    "lslayo-sel_mode   = 'A'.
 
-      "Objetos
-      CREATE OBJECT go_container
-        EXPORTING
-          container_name = g_dynnr.
+    "Variante
+    "lsvari-username = sy-uname.
+    "lsvari-report   = sy-repid.
+    "lsvari-handle   = g_dynnr.
 
-      " CREATE OBJECT go_container "dock
-      "   EXPORTING
-      "     repid = sy-cprog
-      "     dynnr = g_dynnr
-      "     "side  = g_side
-      "     ratio = g_ratio
-      "     extension = g_extension
-      "     name  = 'DOCK'.
-
-      CREATE OBJECT go_alv
-        EXPORTING
-          i_parent = go_container.
-
-      "Layout
-      ls_layo-zebra       = abap_on.
-      "ls_layo-cwidth_opt = abap_on.
-      "ls_layo-col_opt    = abap_on.
-      "ls_layo-no_rowmark = abap_on.
-      "ls_layo-box_fname  = 'SELEC'.
-      "ls_layo-ctab_fname = 'CELLCOLOR'.
-      "ls_layo-stylefname = 'CELLSTYLE'.
-      "ls_layo-info_fname = 'COLOR'.       ls_report-color = 'C700'.
-      "ls_layo-grid_title = 'Reporte'.
-      "ls_layo-sel_mode   = 'A'.
-
-      "Variante
-      "ls_vari-username = sy-uname.
-      "ls_vari-report   = sy-repid.
-      "ls_vari-handle   = g_dynnr.
-
-      "Catalogo
-      "CALL FUNCTION 'LVC_FIELDCATALOG_MERGE'
-      "  EXPORTING
-      "    i_structure_name = sy-repid(30)
-      "  CHANGING
-      "    ct_fieldcat      = lt_fcat.
-      PERFORM u_alv_fcatgen CHANGING gt_det lt_fcat.
+    "Catalogo
+    "CALL FUNCTION 'LVC_FIELDCATALOG_MERGE'
+    "  EXPORTING
+    "    i_structure_name = sy-repid(30)
+    "  CHANGING
+    "    ct_fieldcat      = ltfcat.
+    PERFORM u_alv_fcatgen CHANGING gt_det ltfcat.
 
 *      "Fcat - Descripción
-*      LOOP AT lt_fcat ASSIGNING <fs_fcat>.
-*       CASE <fs_fcat>-fieldname.
-*      "WHEN 'ICON'.       <fs_fcat>-hotspot = abap_on. <fs_fcat>-just = 'C'.
-*      "WHEN 'MESSAGE4'.   <fs_fcat>-tech = abap_on.
-*      "WHEN 'TEXT'.       <fs_fcat>-edit = abap_on.
-*      "WHEN 'STAT_USER'.  <fs_fcat>-outputlen = 4.
-*      "WHEN 'NETWR'.      <fs_fcat>-emphasize = 'C700'.
-*      "WHEN 'K0001'.      PERFORM r_alv_fcatname USING 'Observación' '' CHANGING <fs_fcat>.
+*      LOOP AT ltfcat ASSIGNING <fsfcat>.
+*       CASE <fsfcat>-fieldname.
+*      "WHEN 'ICON'.       <fsfcat>-hotspot = abap_on. <fsfcat>-just = 'C'.
+*      "WHEN 'MESSAGE4'.   <fsfcat>-tech = abap_on.
+*      "WHEN 'TEXT'.       <fsfcat>-edit = abap_on.
+*      "WHEN 'STAT_USER'.  <fsfcat>-outputlen = 4.
+*      "WHEN 'NETWR'.      <fsfcat>-emphasize = 'C700'.
+*      "WHEN 'K0001'.      PERFORM r_alv_fcatname USING 'Observación' '' CHANGING <fsfcat>.
 *       ENDCASE.
 *      ENDLOOP.
 
-      "Eventos
-      "SET HANDLER me->q_alvevent_toolbar  FOR go_alv.
-      "SET HANDLER me->q_alvevent_menu     FOR go_alv.
-      "SET HANDLER me->q_alvevent_uc       FOR go_alv.
-      "SET HANDLER me->q_alvevent_click    FOR go_alv.
-      "SET HANDLER me->q_alvevent_double   FOR go_alv.
-      "SET HANDLER me->q_alvevent_changed  FOR go_alv.
-      "go_alv->register_edit_event( cl_gui_alv_grid=>mc_evt_modified ).
-      "go_alv->register_edit_event( cl_gui_alv_grid=>mc_evt_enter ).
+    "Eventos
+    "SET HANDLER me->q_alvevent_toolbar  FOR go_alv.
+    "SET HANDLER me->q_alvevent_menu     FOR go_alv.
+    "SET HANDLER me->q_alvevent_uc       FOR go_alv.
+    "SET HANDLER me->q_alvevent_click    FOR go_alv.
+    "SET HANDLER me->q_alvevent_double   FOR go_alv.
+    "SET HANDLER me->q_alvevent_changed  FOR go_alv.
+    "go_alv->register_edit_event( cl_gui_alv_grid=>mc_evt_modified ).
+    "go_alv->register_edit_event( cl_gui_alv_grid=>mc_evt_enter ).
 
-      "Toolbar
-      "q_alv_toolbarexclude( IMPORTING et_excl = lt_excl ).
+    "Toolbar
+    "_toolexclude( IMPORTING et_excl = lt_excl ).
 
-      "F4
-      "ls_f4-register = abap_on.
-      "ls_f4-fieldname = 'EQUNR'.
-      "INSERT ls_f4 INTO TABLE lt_f4.
-      "ls_f4-fieldname = 'ACTIVIDAD'.
-      "INSERT ls_f4 INTO TABLE lt_f4.
-      "SET HANDLER me->_f4       FOR go_alv.
-      "go_alv->register_f4_for_fields( it_f4 = lt_f4 ).
+    "F4
+    "ls_f4-register = abap_on.
+    "ls_f4-fieldname = 'EQUNR'.
+    "INSERT ls_f4 INTO TABLE lt_f4.
+    "ls_f4-fieldname = 'ACTIVIDAD'.
+    "INSERT ls_f4 INTO TABLE lt_f4.
+    "SET HANDLER me->_f4       FOR go_alv.
+    "go_alv->register_f4_for_fields( it_f4 = lt_f4 ).
 
-      "Sort
-      "ls_sort-fieldname = 'PGMID'.
-      "ls_sort-up        = 'X'.
-      "APPEND ls_sort TO lt_sort.
-    
-      go_alv->set_table_for_first_display(
-        EXPORTING
-          i_bypassing_buffer    = abap_on
-          i_buffer_active       = abap_on
-          is_layout             = ls_layo
-          "it_toolbar_excluding  = lt_excl
-          is_variant            = ls_vari
-          i_save                = 'A'
-        CHANGING
-          it_outtab             = gt_det
-          it_fieldcatalog       = lt_fcat
-          "it_filter            = ct_filter
-          "it_sort              = lt_sort
-      ).
-    ELSE.
-      "go_alv->set_filter_criteria( ct_filter ).
-      go_alv->refresh_table_display( is_stable = gs_stable ).
-    ENDIF.
+    "Sort
+    "ls_sort-fieldname = 'PGMID'.
+    "ls_sort-up        = 'X'.
+    "APPEND ls_sort TO lt_sort.
+
+    "Alv
+    CREATE OBJECT go_container
+      EXPORTING
+        container_name = g_dynnr.
+
+    " CREATE OBJECT go_container "dock
+    "   EXPORTING
+    "     repid = sy-cprog
+    "     dynnr = g_dynnr
+    "     "side  = g_side
+    "     ratio = g_ratio
+    "     extension = g_extension
+    "     name  = 'DOCK'.
+
+    CREATE OBJECT go_alv
+      EXPORTING
+        i_parent = go_container.
+
+    go_alv->set_table_for_first_display(
+      EXPORTING
+        i_bypassing_buffer    = abap_on
+        i_buffer_active       = abap_on
+        is_layout             = lslayo
+        "it_toolbar_excluding  = lt_excl
+        is_variant            = lsvari
+        i_save                = 'A'
+      CHANGING
+        it_outtab             = gt_det
+        it_fieldcatalog       = ltfcat
+        "it_filter            = ct_filter
+        "it_sort              = lt_sort
+    ).
 
   ENDMETHOD.                    "alvshow
+
+  METHOD refresh.
+    DATA lsstble TYPE lvc_s_stbl VALUE 'XX'.
+**    go_alv->set_filter_criteria( ct_filter ).
+    go_alv->refresh_table_display( is_stable = lsstable ).
+  ENDMETHOD.
   
 *----------------------------------------------------------------------*
 * Get data
 *----------------------------------------------------------------------*
-  METHOD getdata.
+  METHOD report.
     
     r_alv_show( ).      "dock
     "CALL SCREEN g_dynnr. "dock
@@ -231,7 +232,7 @@ CLASS lcr_100 IMPLEMENTATION.
 
         "Set select
         go_alv->get_selected_rows( IMPORTING et_index_rows = lt_row ).
-    IF lt_row IS INITIAL AND ls_layo-sel_mode <> 'A'.
+    IF lt_row IS INITIAL AND lslayo-sel_mode <> 'A'.
       go_alv->get_current_cell( IMPORTING es_row_id = ls_row ).
       APPEND ls_row TO lt_row.
     ENDIF.
@@ -281,7 +282,7 @@ CLASS lcr_100 IMPLEMENTATION.
 *----------------------------------------------------------------------*
 * Click
 *----------------------------------------------------------------------*
-  METHOD r_alv_click.
+  METHOD r_alvevent_click.
     FIELD-SYMBOLS <fs_100> LIKE LINE OF gt_100.
 
     READ TABLE gt_100 ASSIGNING <fs_100> INDEX e_row_id-index.
@@ -308,7 +309,7 @@ CLASS lcr_100 IMPLEMENTATION.
 *----------------------------------------------------------------------*
 * Double
 *----------------------------------------------------------------------*
-  METHOD r_alv_double.
+  METHOD r_alvevent_double.
     DATA: ls_contrato LIKE LINE OF gt_vbak_c.
     READ TABLE gt_vbak_c INTO ls_contrato INDEX e_row-index.
 
@@ -329,7 +330,7 @@ CLASS lcr_100 IMPLEMENTATION.
 *----------------------------------------------------------------------*
 * Changing
 *----------------------------------------------------------------------*
-  METHOD r_alv_changing.
+  METHOD r_alvevent_changing.
     DATA: ls_good TYPE lvc_s_modi.
     FIELD-SYMBOLS <fs100> LIKE LINE OF gt_100.
 
@@ -344,7 +345,7 @@ CLASS lcr_100 IMPLEMENTATION.
 *----------------------------------------------------------------------*
 * Changed
 *----------------------------------------------------------------------*
-  METHOD r_alv_changed.
+  METHOD r_alvevent_changed.
     FIELD-SYMBOLS: <fscell> TYPE lvc_s_modi,
                    <fs100>  LIKE LINE OF gt_100.
 
@@ -365,7 +366,7 @@ CLASS lcr_100 IMPLEMENTATION.
 *----------------------------------------------------------------------*
 * Toolbar
 *----------------------------------------------------------------------*
-  METHOD r_alv_toolbar.
+  METHOD r_alvevent_toolbar.
     DATA: ls_tool TYPE stb_button.
 
     ls_tool-function  = 'CONTA'.
@@ -378,7 +379,7 @@ CLASS lcr_100 IMPLEMENTATION.
 *----------------------------------------------------------------------*
 * UC
 *----------------------------------------------------------------------*
-  METHOD r_alv_uc.
+  METHOD r_alvevent_uc.
     _isselected( ).
 
     CASE e_ucomm.
@@ -401,7 +402,7 @@ CLASS lcr_100 IMPLEMENTATION.
 *----------------------------------------------------------------------*
 * F4
 *----------------------------------------------------------------------*
-  METHOD r_alv_f4.
+  METHOD r_alvevent_f4.
     CASE e_fieldname.
       WHEN 'ACTIVIDAD'.
         f4_actividad( es_row_no ).
@@ -486,17 +487,17 @@ ENDCLASS.
 "* OUTPUT
 "*----------------------------------------------------------------------*
 "MODULE status_0100 OUTPUT.
-"  go_100->r_alv_show( ).
-"
 "  SET PF-STATUS '100_ST'.
 "  SET TITLEBAR '100_TI'.
+"
+"  go_100->refresh( ).
 "ENDMODULE.
 "
 "*----------------------------------------------------------------------*
 "* INPUT
 "*----------------------------------------------------------------------*
 "MODULE user_command_0100 INPUT.
-"  go_100->go_alv->check_changed_data( ).
+"  go_100->check_changed( ).
 "
 "  CASE sy-ucomm.
 "    WHEN 'BACK' OR 'EXIT' OR 'CANC'.
