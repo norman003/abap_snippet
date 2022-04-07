@@ -1,6 +1,10 @@
 {
 	"folders": [
 		{
+			"name": "bago_dev(ABAP)",
+			"uri": "adt://bago_dev"
+		},
+		{
 			"path": "."
 		}
 	],

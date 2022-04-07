@@ -1,4 +1,4 @@
-REPORT ym_u MESSAGE-ID su.
+REPORT ymu MESSAGE-ID su.
 *--------------------------------------------------------------------*
 * Programa para subidas de ot
 * Created  2016.05.27 - by norman tinco
@@ -59,7 +59,7 @@ AT SELECTION-SCREEN.
         EXPORTING
           iv_trkorr = p_trkorr.
     WHEN 'FC04'. PERFORM _showlog USING p_trkorr.
-    WHEN 'FC05'. SUBMIT ym_t VIA SELECTION-SCREEN AND RETURN.
+    WHEN 'FC05'. SUBMIT ymt VIA SELECTION-SCREEN AND RETURN.
     WHEN 'CRET'. PERFORM agregar_transporte USING p_ot2.
   ENDCASE.
 
@@ -462,7 +462,7 @@ FORM upd_srcsystem USING i_paq TYPE tadir-devclass.
   DATA: l_prog TYPE progname.
   REFRESH: bdcdata, bdcmsg.
 
-  l_prog = 'YM_R'.
+  l_prog = 'YMR'.
   PERFORM bdc_dynpro      USING 'SAPLWBABAP' '0100'.
   PERFORM bdc_field       USING 'BDC_OKCODE'          '=STRT'.
   PERFORM bdc_field       USING 'RS38M-PROGRAMM'      l_prog.

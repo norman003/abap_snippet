@@ -87,7 +87,7 @@ CLASS lcl_process IMPLEMENTATION.
 
 
   METHOD a10_accion.
-    DATA: ls_item TYPE mepoitem.
+**    DATA: ls_item TYPE mepoitem.
 
     "Valida
     a10_valida( EXCEPTIONS error = 1 ).
