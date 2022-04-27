@@ -71,7 +71,6 @@ CLASS lcl_report DEFINITION.
   PRIVATE SECTION.
     "Constantes
     "Proceso
-    METHODS: get_constantes.
 **    METHODS: report_denomination_set IMPORTING ir TYPE gty_range CHANGING ct_det TYPE gtt_det.
 **    METHODS: do_contabilizar EXCEPTIONS error.
 **    METHODS: do_mir7 IMPORTING is_det TYPE gty_det EXPORTING et_return TYPE bapirettab e_message TYPE char100 EXCEPTIONS error.
@@ -83,30 +82,22 @@ CLASS lcl_report IMPLEMENTATION.
 
   METHOD constructor.
     CREATE OBJECT ui.
-    get_constantes( ).
-  ENDMETHOD.
 
-
-  METHOD get_constantes.
     DATA: lt_const TYPE TABLE OF zostb_constantes,
           ls_const LIKE LINE OF lt_const.
 
     "1. Get
-    IMPORT zconst = zconst FROM MEMORY ID sy-repid.
-    IF zconst IS INITIAL.
-      SELECT * INTO TABLE lt_const
-        FROM zostb_constantes
-        WHERE programa = sy-repid.
+    SELECT * INTO TABLE lt_const
+      FROM zostb_constantes
+      WHERE programa = sy-repid.
 
-      "1.1. Read
-      LOOP AT lt_const INTO ls_const.
-        CASE ls_const-campo.
+    "1.1. Read
+    LOOP AT lt_const INTO ls_const.
+      CASE ls_const-campo.
 **          WHEN 'BEGDA'.  ui->const_range_set( EXPORTING is_const = ls_const CHANGING cr_range = zconst-r_ ).
-          WHEN OTHERS.
-        ENDCASE.
-      ENDLOOP.
-      EXPORT zconst = zconst TO MEMORY ID sy-repid.
-    ENDIF.
+        WHEN OTHERS.
+      ENDCASE.
+    ENDLOOP.
   ENDMETHOD.
 
 
@@ -115,7 +106,7 @@ CLASS lcl_report IMPLEMENTATION.
 **    DATA: lr      TYPE gty_range.
 
 *--------------------------------------------------------------------*
-*	  I. GET
+*   I. GET DATA"'
 *--------------------------------------------------------------------*
     "01. Clear
     CLEAR gt_det.
@@ -142,7 +133,7 @@ CLASS lcl_report IMPLEMENTATION.
     "Data
 
 *--------------------------------------------------------------------*
-*	  II. BUILD
+*   II. BUILD REPORT"'
 *--------------------------------------------------------------------*
     IF gt_det IS INITIAL.
       MESSAGE e000(su) WITH 'No se encontraron datos para el reporte' RAISING error.
@@ -251,7 +242,7 @@ CLASS lcl_report IMPLEMENTATION.
 **      WHEN '&IC1'.
 **        READ TABLE gt_det INTO DATA(ls_det) INDEX cs_sel-tabindex.
 **        CASE cs_sel-fieldname.
-**          WHEN 'ICON'.
+**          WHEN 'ICON'. ui->return_show( ls_det-return ).
 **          WHEN 'BELNR'.
 **          WHEN OTHERS.
 **        ENDCASE.

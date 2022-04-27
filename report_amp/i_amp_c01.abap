@@ -5,9 +5,9 @@ CLASS lcl_process DEFINITION.
   PUBLIC SECTION.
     "Tipos
     "Data
-    DATA: BEGIN OF zconst,
-            r_bukrs  TYPE RANGE OF bukrs,
-          END OF zconst.
+    CLASS-DATA: BEGIN OF zconst,
+                  r_bukrs TYPE RANGE OF bukrs,
+                END OF zconst.
 
     "Metodos
     METHODS a10_accion EXCEPTIONS error.
@@ -31,7 +31,6 @@ CLASS lcl_process IMPLEMENTATION.
     ENDIF.
 
     "Get
-    IMPORT zconst = zconst FROM MEMORY ID sy-repid.
     IF zconst IS INITIAL.
       SELECT * INTO TABLE lt_const FROM zostb_constantes
         WHERE aplicacion = 'AMPLIACION'
@@ -44,7 +43,6 @@ CLASS lcl_process IMPLEMENTATION.
 **          WHEN 'BUKRS'. APPEND l_string TO zconst-r_bukrs.
         ENDCASE.
       ENDLOOP.
-      EXPORT zconst = zconst TO MEMORY ID sy-repid.
     ENDIF.
 
 **    "Mandatory
