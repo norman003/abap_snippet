@@ -24,7 +24,7 @@ ls_afpo-charg+3    = '63E009'.
 CONCATENATE fecha+6(4) fecha+3(2) fecha+0(2) INTO l_aaaammdd.         "Fecha 6(4)-3(2)-0(2)
 
 *Comparacion
-IF 'ABAB' CO 'ABCD'. ENDIF. "CO contiene solo             CN no contiene solo 
+IF 'ABAB' CO 'ABCD'. ENDIF. "CO contiene solo             NC no contiene solo 
 IF 'ABCD' CS 'CD'.   ENDIF. "CS contiene algun fragmento  NS no contiene el fragmento 
 IF 'ABCD' CA 'CV'.   ENDIF. "CA contiene algún carácter   NA no contiene algun caracter 
 IF 'ABCD' CP '++C*'. ENDIF. "CP comodin sy-fdpos = 2      NP no contiene el comodin

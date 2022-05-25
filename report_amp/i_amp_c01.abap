@@ -51,6 +51,27 @@ CLASS lcl_process IMPLEMENTATION.
 **    ENDIF.
   ENDMETHOD.
 
+  METHOD a10_accion.
+**    DATA: ls_item TYPE mepoitem.
+
+    "Valida
+    a10_valida( EXCEPTIONS error = 1 ).
+    IF sy-subrc <> 0.
+      RAISE error.
+    ENDIF.
+
+**    ls_item = co_item->get_data( ).
+**
+**    "Si ingresa pedido obtener referencia
+**    IF ls_item-zzvbeln IS NOT INITIAL AND ls_item-zzihrez_e IS INITIAL.
+**      SELECT SINGLE ihrez_e INTO ls_item-zzihrez_e FROM vbkd WHERE vbeln = ls_item-zzvbeln.
+**    ENDIF.
+**
+**    "Si ingresa referencia obtener pedido
+**    IF ls_item-zzvbeln IS INITIAL AND ls_item-zzihrez_e IS NOT INITIAL.
+**      SELECT SINGLE vbeln INTO ls_item-zzvbeln FROM vbkd WHERE ihrez_e = ls_item-zzihrez_e.
+**    ENDIF.
+  ENDMETHOD.
 
   METHOD a10_valida.
     DATA: l_edicion  TYPE xfeld,
@@ -83,26 +104,4 @@ CLASS lcl_process IMPLEMENTATION.
     ENDIF.
   ENDMETHOD.
 
-
-  METHOD a10_accion.
-**    DATA: ls_item TYPE mepoitem.
-
-    "Valida
-    a10_valida( EXCEPTIONS error = 1 ).
-    IF sy-subrc <> 0.
-      RAISE error.
-    ENDIF.
-
-**    ls_item = co_item->get_data( ).
-**
-**    "Si ingresa pedido obtener referencia
-**    IF ls_item-zzvbeln IS NOT INITIAL AND ls_item-zzihrez_e IS INITIAL.
-**      SELECT SINGLE ihrez_e INTO ls_item-zzihrez_e FROM vbkd WHERE vbeln = ls_item-zzvbeln.
-**    ENDIF.
-**
-**    "Si ingresa referencia obtener pedido
-**    IF ls_item-zzvbeln IS INITIAL AND ls_item-zzihrez_e IS NOT INITIAL.
-**      SELECT SINGLE vbeln INTO ls_item-zzvbeln FROM vbkd WHERE ihrez_e = ls_item-zzihrez_e.
-**    ENDIF.
-  ENDMETHOD.
 ENDCLASS.

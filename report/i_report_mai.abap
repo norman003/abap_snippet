@@ -10,10 +10,10 @@
 START-OF-SELECTION.
 
   "Parametros
-  PERFORM report_ini.
+  PERFORM constructor.
 
   "Get report
-  go_report->report( EXPORTING iparam = go_report->zparam EXCEPTIONS error = 1 ).
+  go_report->a00_report( EXPORTING iparam = go_report->zparam EXCEPTIONS error = 1 ).
   IF sy-subrc <> 0.
     go_report->ui->message_show( ).
   ENDIF.
