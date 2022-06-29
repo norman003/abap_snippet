@@ -54,14 +54,14 @@ CLASS lcl_report DEFINITION.
     DATA: ui TYPE REF TO lcl_util.
 
     "Methods
-    METHODS a00_report IMPORTING iparam TYPE gty_param EXCEPTIONS error.
-    METHODS a20_report_show CHANGING ct_table TYPE STANDARD TABLE.
+    METHODS a_report IMPORTING iparam TYPE gty_param EXCEPTIONS error.
+    METHODS b_report_show CHANGING ct_table TYPE STANDARD TABLE.
     METHODS constructor.
 **    DATA: go_100 TYPE REF TO cl_gui_alv_grid.
-**    METHODS a21_st CHANGING ct_excl TYPE slis_t_extab.
-**    METHODS a22_uc IMPORTING i_ucomm TYPE clike CHANGING cs_sel TYPE slis_selfield.
-**    METHODS a23_event.
-**    METHODS a24_changed FOR EVENT data_changed_finished OF cl_gui_alv_grid IMPORTING e_modified et_good_cells.
+**    METHODS b_st CHANGING ct_excl TYPE slis_t_extab.
+**    METHODS b_uc IMPORTING i_ucomm TYPE clike CHANGING cs_sel TYPE slis_selfield.
+**    METHODS b_event.
+**    METHODS b_changed FOR EVENT data_changed_finished OF cl_gui_alv_grid IMPORTING e_modified et_good_cells.
 **
 *--------------------------------------------------------------------*
 *  Privada
@@ -69,7 +69,7 @@ CLASS lcl_report DEFINITION.
   PRIVATE SECTION.
     "Constantes
     "Proceso
-**    METHODS a10_report_text IMPORTING ir TYPE gty_range CHANGING ct_det TYPE gtt_det.
+**    METHODS a_report_text IMPORTING ir TYPE gty_range CHANGING ct_det TYPE gtt_det.
 **    METHODS do_contabilizar EXCEPTIONS error.
 **    METHODS do_mir7 IMPORTING is_det TYPE gty_det EXPORTING et_return TYPE bapirettab e_message TYPE char100 EXCEPTIONS error.
 ENDCLASS.
@@ -77,7 +77,7 @@ ENDCLASS.
 CLASS lcl_report IMPLEMENTATION. "'
 
 
-  METHOD a00_report. "'
+  METHOD a_report. "'
 **    DATA: ls_det LIKE LINE OF gt_det.
 **    DATA: lr      TYPE gty_range.
 
@@ -115,19 +115,19 @@ CLASS lcl_report IMPLEMENTATION. "'
       MESSAGE e000(su) WITH 'No se encontraron datos para el reporte' RAISING error.
     ENDIF.
 
-**    a10_report_text( EXPORTING ir = lr CHANGING ct_det = gt_det  ).
+**    a_report_text( EXPORTING ir = lr CHANGING ct_det = gt_det  ).
 
     "'3 alv
-    a20_report_show( CHANGING ct_table = gt_det ).
+    b_report_show( CHANGING ct_table = gt_det ).
 
   ENDMETHOD.
 **
 **
-**  METHOD a10_report_text.
+**  METHOD a_report_text.
 **  ENDMETHOD.
 
 
-  METHOD a20_report_show. "'
+  METHOD b_report_show. "'
     DATA: ls_layo TYPE lvc_s_layo,
           lt_fcat TYPE lvc_t_fcat,
           ls_vari TYPE disvariant,
@@ -181,8 +181,8 @@ CLASS lcl_report IMPLEMENTATION. "'
         is_layout_lvc      = ls_layo
         it_fieldcat_lvc    = lt_fcat
         i_save             = 'A'
-**        i_callback_pf_status_set = 'a21_st'
-**        i_callback_user_command  = 'a22_uc'
+**        i_callback_pf_status_set = 'B_ST'
+**        i_callback_user_command  = 'B_UC'
         is_variant         = ls_vari
       TABLES
         t_outtab           = ct_table
@@ -196,7 +196,7 @@ CLASS lcl_report IMPLEMENTATION. "'
   ENDMETHOD.
 
 
-**  METHOD a21_st.
+**  METHOD b_st.
 **    DATA: lt_fcode TYPE TABLE OF smp_dyntxt,
 **          ls_fcode LIKE LINE OF lt_fcode.
 **
@@ -213,7 +213,7 @@ CLASS lcl_report IMPLEMENTATION. "'
 **  ENDMETHOD.
 **
 **
-**  METHOD a22_uc.
+**  METHOD b_uc.
 **    CASE i_ucomm.
 **      WHEN '&IC1'.
 **        READ TABLE gt_det INTO DATA(ls_det) INDEX cs_sel-tabindex.
@@ -229,18 +229,20 @@ CLASS lcl_report IMPLEMENTATION. "'
 **  ENDMETHOD.
 **
 **
-**  METHOD a23_event.
+**  METHOD b_event.
 **    CALL FUNCTION 'GET_GLOBALS_FROM_SLVC_FULLSCR'
 **      IMPORTING
 **        e_grid = go_100.
 **
-**    SET HANDLER a24_changed FOR go_100.
+**    SET HANDLER b_changed FOR go_100.
 **    go_100->register_edit_event( cl_gui_alv_grid=>mc_evt_modified ).
 **    go_100->register_edit_event( cl_gui_alv_grid=>mc_evt_enter ).
 **  ENDMETHOD.
 **
-**  METHOD a24_changed.
+**  METHOD b_changed.
 **  ENDMETHOD.
+
+
   METHOD constructor. "'
     CREATE OBJECT ui.
 
@@ -263,31 +265,20 @@ CLASS lcl_report IMPLEMENTATION. "'
 
 
 ENDCLASS.
-***--------------------------------------------------------------------*
-*** Alv - Status
-***--------------------------------------------------------------------*
-**FORM a21_st CHANGING ct_excl TYPE slis_t_extab.
-**  go_report->a21_st( CHANGING ct_excl = ct_excl ).
-**ENDFORM.                    "a21_st
 **
-***--------------------------------------------------------------------*
-*** Alv - Uc
-***--------------------------------------------------------------------*
-**FORM a22_uc USING i_ucomm TYPE sy-ucomm cs_sel TYPE slis_selfield.
-**  go_report->a22_uc( EXPORTING i_ucomm = i_ucomm CHANGING cs_sel = cs_sel ).
-**ENDFORM.                    "a22_uc
+**FORM b_st CHANGING ct_excl TYPE slis_t_extab.
+**  go_report->b_st( CHANGING ct_excl = ct_excl ).
+**ENDFORM.                    "b_st
 **
-***--------------------------------------------------------------------*
-*** Alv - Event
-***--------------------------------------------------------------------*
-**FORM a23_event USING is_exit TYPE slis_data_caller_exit.
-**  go_report->a23_event( ).
+**FORM b_uc USING i_ucomm TYPE sy-ucomm cs_sel TYPE slis_selfield.
+**  go_report->b_uc( EXPORTING i_ucomm = i_ucomm CHANGING cs_sel = cs_sel ).
+**ENDFORM.                    "b_uc
+**
+**FORM b_event USING is_exit TYPE slis_data_caller_exit.
+**  go_report->b_event( ).
 **ENDFORM.
-
-*--------------------------------------------------------------------*
-*  Constructor
-*--------------------------------------------------------------------*
-FORM constructor. "'
+**
+FORM create. "'
   CREATE OBJECT go_report.
 
 **  go_report->zparam-r_bukrs = s_bukrs[].
