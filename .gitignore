@@ -1,6 +1,6 @@
-/Settings.ini
-*.code-workspace
-/WordList.txt
-/.obsidian
 /.trash
-/autocomplete_1.3.ahk
+/.obsidian
+/Settings.ini
+/WordList.txt
+*.ahk
+*.code-workspace
