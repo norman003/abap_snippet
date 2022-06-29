@@ -11,7 +11,7 @@ Usar el boton de commit para guardar (git commit -a -m "commentario") luego boto
 ![](.media/Pasted%20image%2020210628044923.png)
 ![](.media/Pasted%20image%2020210628045044.png)
 
-Mas facil con la extension "Git add commit push" que nos da un shortcut.
+Mas facil con la extension "Git add commit push" que nos da un shortcut..
 
 ![](.media/Pasted%20image%2020210628052957.png)
 
