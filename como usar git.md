@@ -22,3 +22,5 @@ Usar el boton sync para subir y bajar cambios desde GIT (git pull origin)(git pu
 ![](.media/Pasted%20image%2020210628045044.png)
 
 Aqui indica cuantos archivos se subiran y bajaran.
+
+esto es un cambio en venezuela
